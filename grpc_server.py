@@ -12,7 +12,7 @@ from watchdog.observers import Observer
 
 from models.heartbeat import add_heartbeat
 from models.log import add_log
-from models.user import modify_user
+from models.user import modify_user, get_delay_time
 from utils import *
 from config import Config
 from interface import InterfaceManager
@@ -64,15 +64,22 @@ class Verification(BaseService):
         if context_type == MessageType.Verify:  # 网络验证
             modify_user(student_code, datetime.datetime.now(), datetime.datetime.now())
             add_log(student_code, 'login')
-            return self.easy_response({
-                "message": message,
-                "success": True if code == 0 else False
-            })
+            return self.easy_response({"success": True})
         elif context_type == MessageType.Heartbeat:  # 心跳
             modify_user(student_code, None, datetime.datetime.now())
-            add_heartbeat(student_code, body['course'], body['device'])
+            add_heartbeat(student_code, body['course'], device)
+            return self.easy_response({"success": True})
         elif context_type == MessageType.Logging:  # 日志
             add_log(student_code, body['log'])
+            return self.easy_response({"success": True})
+        elif context_type == MessageType.Control:  # 控制频率
+            delay_time = get_delay_time(student_code, body['course'])
+            return self.easy_response({
+                "message": {
+                    'delay_time': delay_time
+                },
+                "success": True
+            })
 
         return self.easy_response({})
 

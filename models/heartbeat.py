@@ -5,7 +5,7 @@
 import datetime
 import json
 
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, Integer, DateTime, and_
 
 from models import Base, DBSession
 
@@ -35,6 +35,18 @@ def add_heartbeat(student_code, course, device):
 
     session.add(heartbeat)
     session.commit()
+
+
+def get_people_number(course):
+    session = DBSession()
+    heartbeats = session.query(Heartbeat).filter(and_(
+        Heartbeat.course == course,
+        Heartbeat.create_time + 30 > datetime.datetime.now()
+    )).all()
+    res = set()
+    for heartbeat in heartbeats:
+        res.add(heartbeat.student_code)
+    return len(res)
 
 
 if __name__ == '__main__':
