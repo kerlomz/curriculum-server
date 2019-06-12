@@ -3,6 +3,7 @@
 # Author: taoting <taoting1234@gmail.com>
 
 import datetime
+import json
 
 from sqlalchemy import Column, String, Integer, DateTime
 
@@ -14,16 +15,22 @@ class Heartbeat(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     student_code = Column(String(100), nullable=False)
-    log = Column(String(1000), nullable=False)
+    course = Column(String(100), nullable=False)
+    device = Column(String(100), nullable=False)
     create_time = Column(DateTime, nullable=False)
 
 
-def add_heartbeat(student_code, log):
+def add_heartbeat(student_code, course, device):
     session = DBSession()
 
     heartbeat = Heartbeat()
     heartbeat.student_code = student_code
-    heartbeat.log = log
+    heartbeat.course = course
+    heartbeat.device = json.dumps({
+        'mac_addr': device.mac_addr,
+        'hostname': device.hostname,
+        'c_volume_serial_number': device.c_volume_serial_number
+    })
     heartbeat.create_time = datetime.datetime.now()
 
     session.add(heartbeat)
@@ -31,5 +38,4 @@ def add_heartbeat(student_code, log):
 
 
 if __name__ == '__main__':
-    add_heartbeat('31702411', '1111')
     pass

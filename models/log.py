@@ -13,16 +13,16 @@ class Log(Base):
     __tablename__ = 'log'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    auth_id = Column(String(100), nullable=False)
+    student_code = Column(String(100), nullable=False)
     info = Column(String(1000), nullable=False)
     create_time = Column(DateTime, nullable=False)
 
 
-def add_log(auth_id, info):
+def add_log(student_code, info):
     session = DBSession()
 
     log = Log()
-    log.auth_id = auth_id
+    log.student_code = student_code
     log.log = info
     log.create_time = datetime.datetime.now()
 

@@ -13,19 +13,28 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    student_code = Column(String(100), nullable=False)
+    student_code = Column(String(100), nullable=False, unique=True)
     last_login_time = Column(DateTime)
-    create_time = Column(DateTime, nullable=False)
+    last_online_time = Column(DateTime)
+    register_time = Column(DateTime, nullable=False)
 
 
 def add_user(student_code):
     session = DBSession()
-
     user = User()
     user.student_code = student_code
-    user.create_time = datetime.datetime.now()
-
+    user.register_time = datetime.datetime.now()
     session.add(user)
+    session.commit()
+
+
+def modify_user(student_code, last_login_time, last_online_time):
+    session = DBSession()
+    user = session.query(User).filter(User.student_code == student_code).first()
+    if last_login_time:
+        user.last_login_time = last_login_time
+    if last_online_time:
+        user.last_online_time = last_online_time
     session.commit()
 
 
