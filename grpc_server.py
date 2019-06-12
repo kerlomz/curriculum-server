@@ -41,36 +41,32 @@ class Verification(BaseService):
             return f.readlines()
 
     def verification(self, request, context):
-
         """
         解析请求:
         plain_request.context.body: 消息主体; plain_request.device: 设备信息
         """
-        """网络验证 Start"""
         plain_request = ResponseParser.parse(request=request.key)
         body = plain_request.context.body
-        if plain_request.context.context_type == MessageType.Verify:
-            return self.easy_response({
-                "message": plain_request.context.message,
-                "success": True if plain_request.context.code == 0 else False
-            })
+        context_type = plain_request.context.context_type
+        message = plain_request.context.message
+        code = plain_request.context.code
         device = plain_request.device
+        student_code = plain_request.student_code
+
         auth_logger.info("{} - [{}] | {} | {} | Device: [{}]".format(
-            TimeUtils.datetime(), plain_request.student_code, plain_request.context.message, body, device
+            TimeUtils.datetime(), student_code, message, body, device
         ))
-        """网络验证 End"""
 
-        """心跳验证 Start"""
-        """心跳验证 End"""
+        if context_type == MessageType.Verify:  # 网络验证
+            return self.easy_response({
+                "message": message,
+                "success": True if code == 0 else False
+            })
+        elif context_type == MessageType.Heartbeat:  # 心跳
 
-        """上报选课课程 Start"""
-        """上报选课课程 End"""
-
-        """操作日志 Start"""
-        """操作日志 End"""
-
-        """上报选课课程 Start"""
-        """上报选课课程 End"""
+            pass
+        elif context_type == MessageType.Logging:  # 日志
+            pass
 
         return self.easy_response({})
 
