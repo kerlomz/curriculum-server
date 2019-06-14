@@ -11,3 +11,4 @@ rsa
 psutil
 pywin32
 sqlalchemy
+pymysql

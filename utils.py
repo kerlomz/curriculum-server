@@ -13,15 +13,9 @@ import numpy as np
 from PIL import Image as PIL_Image
 from pretreatment import preprocessing
 from config import ModelConfig
-from constants import Security, Response
-from entity import MessageType, ClientMessage, Context
-
-from Crypto.Cipher import PKCS1_v1_5 as Cipher_pkcs1_v1_5
-from Crypto.PublicKey import RSA
-
-security = Security()
-PUBLIC_KEY = security.public_key
-PRIVATE_KEY = security.private_key
+from constants import Response
+from entity import ClientMessage
+from core import RSAUtils
 
 
 class Cache(object):
@@ -33,57 +27,6 @@ class Cache(object):
     @staticmethod
     def open(obj):
         return pickle.loads(obj) if obj else obj
-
-
-class RSAUtils(object):
-
-    @staticmethod
-    def encrypt(plain_text):
-        public_key = RSA.importKey(PUBLIC_KEY)
-        _p = Cipher_pkcs1_v1_5.new(public_key)
-        plain_text = plain_text.encode('utf-8') if isinstance(plain_text, str) else plain_text
-        # 1024bit key
-        try:
-            default_encrypt_length = 117
-            len_content = len(plain_text)
-            if len_content < default_encrypt_length:
-                return base64.b64encode(_p.encrypt(plain_text)).decode()
-            offset = 0
-            params_lst = []
-            while len_content - offset > 0:
-                if len_content - offset > default_encrypt_length:
-                    params_lst.append(_p.encrypt(plain_text[offset:offset + default_encrypt_length]))
-                else:
-                    params_lst.append(_p.encrypt(plain_text[offset:]))
-                offset += default_encrypt_length
-            target = b''.join(params_lst)
-            return base64.b64encode(target).decode()
-        except ValueError:
-            return None
-
-    @staticmethod
-    def decrypt(cipher_text, decode=True):
-        private_key = RSA.importKey(PRIVATE_KEY)
-        _pri = Cipher_pkcs1_v1_5.new(private_key)
-        cipher_text = base64.b64decode(cipher_text if isinstance(cipher_text, bytes) else cipher_text.encode('utf-8'))
-        # 1024bit key
-        try:
-            default_length = 128
-            len_content = len(cipher_text)
-            if len_content < default_length:
-                return _pri.decrypt(cipher_text, "ERROR").decode()
-            offset = 0
-            params_lst = []
-            while len_content - offset > 0:
-                if len_content - offset > default_length:
-                    params_lst.append(_pri.decrypt(cipher_text[offset: offset + default_length], "ERROR"))
-                else:
-                    params_lst.append(_pri.decrypt(cipher_text[offset:], "ERROR"))
-                offset += default_length
-            target = b''.join(params_lst)
-            return target.decode() if decode else target
-        except ValueError:
-            return None
 
 
 class PathUtils(object):
@@ -223,12 +166,12 @@ class ImageUtils(object):
         return None
 
 
-class ResponseParser:
+class ResponseParser(object):
 
     def __init__(self, host: str, port):
         self._url = '{}:{}'.format(host, port)
 
-    def request(self, key, encrypted=True) -> object:
+    def request(self, key, encrypted=True) -> ClientMessage:
         channel = grpc.insecure_channel(self._url)
         stub = grpc_pb2_grpc.VerificationStub(channel)
         response = stub.verification(grpc_pb2.VerificationRequest(
@@ -241,7 +184,7 @@ class ResponseParser:
         return grpc_pb2.VerificationResult(result=ResponseParser.dumps(key))
 
     @staticmethod
-    def parse(request):
+    def parse(request) -> ClientMessage:
         decrypted_object = RSAUtils.decrypt(request, decode=False)
         return Cache.open(decrypted_object)
 

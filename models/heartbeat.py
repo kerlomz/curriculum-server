@@ -3,11 +3,13 @@
 # Author: taoting <taoting1234@gmail.com>
 
 import datetime
-import json
 
 from sqlalchemy import Column, String, Integer, DateTime, and_
 
-from models import Base, DBSession
+from models import Base, engine, session_maker
+from models.log import Log
+from entity import Device, ClientMessage
+from core import Core
 
 
 class Heartbeat(Base):
@@ -15,39 +17,68 @@ class Heartbeat(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     student_code = Column(String(100), nullable=False)
-    course = Column(String(100), nullable=False)
-    device = Column(String(100), nullable=False)
-    create_time = Column(DateTime, nullable=False)
+    course_code = Column(String(100), nullable=False)
+    device = Column(String(256), nullable=False)
+    device_id = Column(String(128), nullable=False)
+    created_time = Column(DateTime, nullable=False)
 
+    def __repr__(self):
+        return "<Heartbeat(id='%s', student_code='%s', course_code='%s', device='%s', device_id='%s', created_time='%s')>" % (
+            self.id,
+            self.student_code,
+            self.course_code,
+            self.device,
+            self.device_id,
+            self.created_time
+        )
 
-def add_heartbeat(student_code, course, device):
-    session = DBSession()
+    @classmethod
+    def add(cls, client_msg: ClientMessage, course_code: str):
+        with session_maker() as session:
+            heartbeat = cls()
+            heartbeat.student_code = client_msg.student_code
+            heartbeat.course_code = course_code
+            heartbeat.device = client_msg.device.dumps()
+            heartbeat.device_id = client_msg.auth_license
+            calc_device_id = Core.machine_code_auth(
+                stu_code=client_msg.student_code,
+                mac_addr=client_msg.device.mac_addr,
+                c_volume_serial_number=client_msg.device.c_volume_serial_number,
+                hostname=client_msg.device.hostname
+            )
+            if calc_device_id != client_msg.auth_license:
+                Log.add(client_msg)
+            heartbeat.create_time = datetime.datetime.now()
+            session.add(heartbeat)
 
-    heartbeat = Heartbeat()
-    heartbeat.student_code = student_code
-    heartbeat.course = course
-    heartbeat.device = json.dumps({
-        'mac_addr': device.mac_addr,
-        'hostname': device.hostname,
-        'c_volume_serial_number': device.c_volume_serial_number
-    })
-    heartbeat.create_time = datetime.datetime.now()
-
-    session.add(heartbeat)
-    session.commit()
-
-
-def get_people_number(course):
-    session = DBSession()
-    heartbeats = session.query(Heartbeat).filter(and_(
-        Heartbeat.course == course,
-        Heartbeat.create_time + 30 > datetime.datetime.now()
-    )).all()
-    res = set()
-    for heartbeat in heartbeats:
-        res.add(heartbeat.student_code)
-    return len(res)
+    @classmethod
+    def get_people_number(cls, course_code):
+        with session_maker() as session:
+            heartbeats = session.query(cls).filter(and_(
+                cls.course_code == course_code,
+                cls.created_time + 30 > datetime.datetime.now()
+            )).all()
+            res = set()
+            for heartbeat in heartbeats:
+                res.add(heartbeat.student_code)
+            return len(res)
 
 
 if __name__ == '__main__':
-    pass
+    Heartbeat.metadata.drop_all(engine)
+    Heartbeat.metadata.create_all(engine)
+    a = Device().from_core()
+    t = a.auth_license.update({"31301188": 'fdsfa'})
+    c = ClientMessage(device=a, stu_code="31301188")
+    Heartbeat.add(c.send({}), "aaa")
+    # print(h)
+
+    # Log.add(
+    #     student_code="",
+    #     message="iopiop",
+    #     body={"123": 123},
+    #     device_id="89789789",
+    #     mac_addr="hjkhjkhjkhjk"
+    # )
+    r = Heartbeat.get_people_number("aaa")
+    print(r)

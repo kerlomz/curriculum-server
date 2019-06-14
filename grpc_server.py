@@ -10,14 +10,14 @@ import threading
 from concurrent import futures
 from watchdog.observers import Observer
 
-from models.heartbeat import add_heartbeat
-from models.log import add_log
-from models.user import modify_user, get_delay_time
+from models.heartbeat import Heartbeat
+from models.log import Log
+from models.user import User
 from utils import *
 from config import Config
 from interface import InterfaceManager
 from event_handler import FileEventHandler
-from entity import Device, ClientMessage, ServerMessage
+from entity import ServerMessage, MessageType
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 
@@ -62,18 +62,18 @@ class Verification(BaseService):
         ))
 
         if context_type == MessageType.Verify:  # 网络验证
-            modify_user(student_code, datetime.datetime.now(), datetime.datetime.now())
-            add_log(student_code, 'login')
-            return self.easy_response({"success": True})
+            User.modify(plain_request, last_login_time=datetime.datetime.now(), last_online_time=datetime.datetime.now())
+            Log.add(plain_request, "Login")
+            return self.easy_response({"success": True if code >= 0 else False})
         elif context_type == MessageType.Heartbeat:  # 心跳
-            modify_user(student_code, None, datetime.datetime.now())
-            add_heartbeat(student_code, body['course'], device)
-            return self.easy_response({"success": True})
+            User.modify(student_code, device.device_id, datetime.datetime.now())
+            Heartbeat.add(plain_request, body['course'])
+            return self.easy_response({"success": True if code >= 0 else False})
         elif context_type == MessageType.Logging:  # 日志
-            add_log(student_code, body['log'])
-            return self.easy_response({"success": True})
+            Log.add(plain_request, "ClientLog")
+            return self.easy_response({"success": True if code >= 0 else False})
         elif context_type == MessageType.Control:  # 控制频率
-            delay_time = get_delay_time(student_code, body['course'])
+            delay_time = User.get_delay_time(student_code, body['course'])
             return self.easy_response({
                 "message": {
                     'delay_time': delay_time
