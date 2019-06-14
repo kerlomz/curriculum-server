@@ -96,7 +96,7 @@ class Core:
 
     @classmethod
     def machine_code(cls, stu_code):
-        c_volume_serial_number = cls.c_volume_serial_number
+        c_volume_serial_number = cls.c_volume_serial_number()
         mac = [v[0][1] for v in net_if_addrs().values() if len(v[0][1]) == 17][0]
         hostname = socket.gethostname()
         plain_text = "{}||{}||{}||{}||{}".format(stu_code, c_volume_serial_number, mac, hostname, time.time())
@@ -121,5 +121,5 @@ class Core:
 
 if __name__ == '__main__':
     r = Core.decrypt_auth(
-        "O/zxgDfnn3+4&5/y5sK3t%aah4C6nM2zx9x40/JcM%tzUW50H0PpdQ%4W3/kA9N/VneyLs8rSD719s2e1/p4C/epVXdWONnK0lR4gPaHFVJka5qzDynfuwGdtAcP0S&Xi7hyuHjcDh0zi58Ui1CuUIZvq4dkLnsMwCrrS2zRzXQ=")
+        "HnoHyITQVcnzv+M77P0J9wihSvnxV3Zr1TNcWy625O+PrQAK3F0CY6I%SQyDlN7tk+WgTBOzP5SUUx1eQtQ&D+9Q6kj49Z6gPky%LIX8sryBq7klPyMX9dfMC0OqBHdQulAM+30Ux/JG0Rz2nSxg++HV%tecyCOl0ZfmyY2Xecc=")
     print(r)
