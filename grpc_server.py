@@ -62,11 +62,11 @@ class Verification(BaseService):
         ))
 
         if context_type == MessageType.Verify:  # 网络验证
-            User.modify(plain_request, last_login_time=datetime.datetime.now(), last_online_time=datetime.datetime.now())
+            User.modify(plain_request, datetime.datetime.now(), datetime.datetime.now())
             Log.add(plain_request, "Login")
             return self.easy_response({"success": True if code >= 0 else False})
         elif context_type == MessageType.Heartbeat:  # 心跳
-            User.modify(student_code, device.device_id, datetime.datetime.now())
+            User.modify(plain_request, None, datetime.datetime.now())
             Heartbeat.add(plain_request, body['course'])
             return self.easy_response({"success": True if code >= 0 else False})
         elif context_type == MessageType.Logging:  # 日志

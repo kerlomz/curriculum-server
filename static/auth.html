@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+
+<input id="input">
+<br/>
+<button id="submit">提交</button>
+<br/>
+<a id="output"></a>
+
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<script>
+  ajax = function (url, method, data) {
+    // Default options are marked with *
+    return fetch(url, {
+      body: JSON.stringify(data), // must match 'Content-Type' header
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'include', // include, same-origin, *omit
+      headers: {
+        'content-type': 'application/json; charset=utf-8'
+      },
+      method: method, // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, cors, *same-origin
+      redirect: 'follow', // manual, *follow, error
+      referrer: 'client', // *client, no-referrer
+    })
+      .then(response => response.json()) // parses response to JSON
+  };
+  $('#submit').click(function () {
+    let code = $('#input').val();
+    ajax('http://47.111.25.1:5450/auth', 'post', {
+      code: code,
+    }).then((data) => {
+      $('#output').text(data.res)
+    })
+  });
+</script>
+</html>

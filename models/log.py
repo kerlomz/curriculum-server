@@ -45,7 +45,6 @@ class Log(Base):
 
         with session_maker() as session:
             log = cls()
-
             log.student_code = client_msg.student_code
             log.content = content
             log.message = client_msg.context.message

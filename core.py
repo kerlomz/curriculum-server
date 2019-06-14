@@ -121,5 +121,5 @@ class Core:
 
 if __name__ == '__main__':
     r = Core.decrypt_auth(
-        "O/zxgDfnn3+4&5/y5sK3t%aah4C6nM2zx9x40/JcM%tzUW50H0PpdQ%4W3/kA9N/VneyLs8rSD719s2e1/p4C/epVXdWONnK0lR4gPaHFVJka5qzDynfuwGdtAcP0S&Xi7hyuHjcDh0zi58Ui1CuUIZvq4dkLnsMwCrrS2zRzXQ=")
+        "O5wlhtGvMpTqKytf%niDMe6I5nr1XxFtwcRcrr7Hq8cF6zfO&d4y5PxTv7Wie5QHSzdxOmU6j%mlijQ6gI14f22/Ar7d0CYr6SIR0ecaRHXa+eD&Nk+/LSlu1%/svjjTYaW%OUIVjtv8pOezQDNFYQs7g&yjOiA&A8N1MIcYLg4S%hQvkj&MLsRwtncYF3XDPqR7dzOWpiO6&tm8jd0UJ0Jy30KQlhBNRm2gQcFIKHAG447Qdx4o33yzrxBTaA92rRrqnK/xp/f6U+RO7hITxxCcAocS%cJk0l8IeePqXGI&rX&5r%866aS8r8xtxazqioST6&g2VL+ZBlTupRxltg==")
     print(r)

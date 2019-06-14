@@ -17,27 +17,27 @@ class Heartbeat(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     student_code = Column(String(100), nullable=False)
-    course_code = Column(String(100), nullable=False)
+    course = Column(String(100), nullable=False)
     device = Column(String(256), nullable=False)
     device_id = Column(String(128), nullable=False)
     created_time = Column(DateTime, nullable=False)
 
     def __repr__(self):
-        return "<Heartbeat(id='%s', student_code='%s', course_code='%s', device='%s', device_id='%s', created_time='%s')>" % (
+        return "<Heartbeat(id='%s', student_code='%s', course='%s', device='%s', device_id='%s', created_time='%s')>" % (
             self.id,
             self.student_code,
-            self.course_code,
+            self.course,
             self.device,
             self.device_id,
             self.created_time
         )
 
     @classmethod
-    def add(cls, client_msg: ClientMessage, course_code: str):
+    def add(cls, client_msg: ClientMessage, course: str):
         with session_maker() as session:
             heartbeat = cls()
             heartbeat.student_code = client_msg.student_code
-            heartbeat.course_code = course_code
+            heartbeat.course = course
             heartbeat.device = client_msg.device.dumps()
             heartbeat.device_id = client_msg.auth_license
             calc_device_id = Core.machine_code_auth(
@@ -48,14 +48,14 @@ class Heartbeat(Base):
             )
             if calc_device_id != client_msg.auth_license:
                 Log.add(client_msg)
-            heartbeat.create_time = datetime.datetime.now()
+            heartbeat.created_time = datetime.datetime.now()
             session.add(heartbeat)
 
     @classmethod
-    def get_people_number(cls, course_code):
+    def get_people_number(cls, course):
         with session_maker() as session:
             heartbeats = session.query(cls).filter(and_(
-                cls.course_code == course_code,
+                cls.course == course,
                 cls.created_time + 30 > datetime.datetime.now()
             )).all()
             res = set()

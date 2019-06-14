@@ -39,7 +39,6 @@ class User(Base):
             user = session.query(User).filter(User.student_code == client_msg.student_code).first()
             if not user:
                 user = User.add(client_msg.student_code, client_msg.device.device_id)
-
             user.last_login_auth_license = client_msg.auth_license
             user.last_login_device = client_msg.device.device_id
             if last_login_time:
