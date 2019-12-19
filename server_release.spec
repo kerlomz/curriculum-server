@@ -2,9 +2,9 @@
 
 block_cipher = pyi_crypto.PyiBlockCipher(key='Zhou4315')
 
-added_files = [('model.h5', '.')]
-a = Analysis(['auth_server.py'],
-             pathex=['D:\\Workplace\\PyCharm Projects\\Curriculum\\curriculum-manager'],
+added_files = None
+a = Analysis(['grpc_server.py'],
+             pathex=['.'],
              binaries=[],
              datas=added_files,
              hiddenimports=[],

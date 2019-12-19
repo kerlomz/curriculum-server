@@ -11,3 +11,6 @@ rsa
 psutil
 sqlalchemy
 pymysql
+flask
+flask_cors
+requests

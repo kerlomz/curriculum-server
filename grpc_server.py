@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # Author: kerlomz <kerlomz@gmail.com>
-
+import pymysql
 import time
 import logging
 import datetime
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     server_host = "0.0.0.0"
     auth_logger = logging.getLogger(__name__ + "__auth__")
     auth_logger.setLevel(level=logging.INFO)
-    auth_handler = logging.FileHandler("auth_log.txt")
+    auth_handler = logging.FileHandler("auth_log.txt", encoding="utf8")
     auth_stream_handler = logging.StreamHandler()
     auth_handler.setLevel(logging.INFO)
     auth_logger.addHandler(auth_handler)
@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
     captcha_logger = logging.getLogger(__name__ + "__captcha__")
     captcha_logger.setLevel(level=logging.INFO)
-    captcha_handler = logging.FileHandler("captcha_log.txt")
+    captcha_handler = logging.FileHandler("captcha_log.txt", encoding="utf8")
     captcha_stream_handler = logging.StreamHandler()
     captcha_handler.setLevel(logging.INFO)
     captcha_logger.addHandler(captcha_handler)
